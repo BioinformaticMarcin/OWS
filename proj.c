@@ -1,4 +1,4 @@
-//#pragma warning(disable : 4996)
+#pragma warning(disable : 4996)
 
 #include <mpi.h>
 #include <stdio.h>
@@ -14,19 +14,20 @@ float a[SIZE][SIZE], b[SIZE][SIZE], c[SIZE][SIZE];
 float aa[SIZE][SIZE], bb[SIZE][SIZE];
 float (*psa)[SIZE], (*psb)[SIZE], (*pra)[SIZE], (*prb)[SIZE];
 
+int koniec;
 double startwtime1, startwtime2, endwtime;
+
+void fileRead();
 
 int main(int argc, char** argv)
 {
 
-	FILE* file;
 	FILE* file_out;
 
 	int my_rank, ncpus;
 	int row, col, mod = 0;
 	int data_received = -1;
 	int tag = 101;
-	int koniec;
 
 	MPI_Status  statRecv[2]; //status odbioru 
 	MPI_Request reqSend[2], reqRecv[2];  // identyfikator komunikacji 
@@ -41,37 +42,7 @@ int main(int argc, char** argv)
 
 		startwtime1 = MPI_Wtime();//czas w sekundach
 
-		//wczytanie danych przez proces rank=0
-		fopen_s(&file, "C:\\Users\\Marcin-PC\\Desktop\\OWS\\zad7_projekt\\liczby.txt", "r");
-		if (file == NULL)
-		{
-			printf("Blad otwarcia pliku \"liczby.txt\"\n");
-			koniec = 1;
-			MPI_Bcast(&koniec, 1, MPI_INT, 0, MPI_COMM_WORLD);
-			MPI_Finalize();
-			exit(0);
-		}
-		else {
-			float num;
-			for (size_t i = 0; i < SIZE; i++)
-			{
-				for (size_t j = 0; j < SIZE; j++)
-				{
-					if (fscanf_s(file, "%f", &num))
-					{
-						a[i][j] = num;
-						printf("Tab value [%f] <> file value [%f]\n", a[i][j], num);
-					}
-					else
-					{
-						printf("EOF\n");
-					}
-				}
-			}
-			fclose(file);
-			koniec = 0;
-			MPI_Bcast(&koniec, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		}
+		fileRead();
 	}
 	else
 	{
@@ -135,4 +106,43 @@ int main(int argc, char** argv)
 
 	MPI_Finalize();
 	return 0;
+}
+
+void fileRead()
+{
+	//wczytanie danych przez proces rank=0
+	FILE* file;
+	//int koniec;
+	file = fopen("liczby.txt", "r");
+	if (file == NULL)
+	{
+		printf("Blad otwarcia pliku \"liczby.txt\"\n");
+		koniec = 1;
+		MPI_Bcast(&koniec, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Finalize();
+		exit(0);
+	}
+	else {
+		float num;
+		for (size_t i = 0; i < SIZE; i++)
+		{
+			for (size_t j = 0; j < SIZE; j++)
+			{
+				if (fscanf(file, "%f", &num))
+				{
+					a[i][j] = num;
+					//printf("Tab value [%f] <> file value [%f]\n", a[i][j], num);
+					printf("[%.2f]", num);
+				}
+				else
+				{
+					printf("EOF\n");
+				}
+			}
+			printf("\n");
+		}
+		fclose(file);
+		koniec = 0;
+		MPI_Bcast(&koniec, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	}
 }
