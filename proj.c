@@ -1,4 +1,4 @@
-#pragma warning(disable : 4996)
+//#pragma warning(disable : 4996)
 
 #include <mpi.h>
 #include <stdio.h>
@@ -19,8 +19,8 @@ double startwtime1, startwtime2, endwtime;
 int main(int argc, char** argv)
 {
 
-	FILE* plik;
-	FILE* plik_out;
+	FILE* file;
+	FILE* file_out;
 
 	int my_rank, ncpus;
 	int row, col, mod = 0;
@@ -42,8 +42,8 @@ int main(int argc, char** argv)
 		startwtime1 = MPI_Wtime();//czas w sekundach
 
 		//wczytanie danych przez proces rank=0
-		plik = fopen("C:\\Users\\Marcin-PC\\Desktop\\OWS\\zad7_projekt\\liczby.txt", "r");
-		if (plik == NULL)
+		fopen_s(&file, "C:\\Users\\Marcin-PC\\Desktop\\OWS\\zad7_projekt\\liczby.txt", "r");
+		if (file == NULL)
 		{
 			printf("Blad otwarcia pliku \"liczby.txt\"\n");
 			koniec = 1;
@@ -52,6 +52,23 @@ int main(int argc, char** argv)
 			exit(0);
 		}
 		else {
+			float num;
+			for (size_t i = 0; i < SIZE; i++)
+			{
+				for (size_t j = 0; j < SIZE; j++)
+				{
+					if (fscanf_s(file, "%f", &num))
+					{
+						a[i][j] = num;
+						printf("Tab value [%f] <> file value [%f]\n", a[i][j], num);
+					}
+					else
+					{
+						printf("EOF\n");
+					}
+				}
+			}
+			fclose(file);
 			koniec = 0;
 			MPI_Bcast(&koniec, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		}
