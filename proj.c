@@ -17,6 +17,7 @@ float (*psa)[SIZE], (*psb)[SIZE], (*pra)[SIZE], (*prb)[SIZE];
 int koniec;
 double startwtime1, startwtime2, endwtime;
 
+void fileSave();
 void fileRead();
 
 int main(int argc, char** argv)
@@ -41,8 +42,7 @@ int main(int argc, char** argv)
 		printf("obliczenia metod  Cannona dla tablicy %d x %d element w \n", n, n);
 
 		startwtime1 = MPI_Wtime();//czas w sekundach
-
-		fileRead();
+		fileRead(); //odczyt z pliku do tab a
 	}
 	else
 	{
@@ -53,7 +53,8 @@ int main(int argc, char** argv)
 
 	if (ncpus != P) {
 		if (my_rank == 0) printf("wywolano obliczenia iloczynu macierzy metoda cannona na %d procesach - uruchom mpiexec -n %d matrixmult\n", ncpus, P);
-		MPI_Finalize(); 	exit(0);
+		MPI_Finalize(); 	
+		exit(0);
 	}
 
 	if (my_rank == 0)
@@ -104,8 +105,41 @@ int main(int argc, char** argv)
 		// porównanie poprawności obliczeń (Csek, Cglob) przy uwzględniniu progu poprawności 
 	}
 
+	fileSave();
+
 	MPI_Finalize();
 	return 0;
+}
+
+void fileSave() 
+{
+	FILE* fileOut;
+
+	fileOut = fopen("wynik.txt", "w+");
+	if (fileOut == NULL)
+	{
+		printf("Blad otwarcia pliku \"wynik.txt\"\n");
+		exit(0);
+	}
+	else {
+		for (size_t i = 0; i < SIZE; i++)
+		{
+			for (size_t j = 0; j < SIZE; j++)
+			{
+				if (c[i][j])
+				{
+					fprintf(fileOut, "%f", c[i][j]);
+				}
+				else {
+					printf("Blad w tabeli wynikowej na pozycji");
+				}
+			}
+			printf("\n");
+		}
+		printf("Koniec zapisu pliku\n");
+		fclose(fileOut);
+		printf("Plik zamknięty poprawnie\n");
+	}
 }
 
 void fileRead()
@@ -141,7 +175,9 @@ void fileRead()
 			}
 			printf("\n");
 		}
+		printf("Koniec odczytu pliku\n");
 		fclose(file);
+		printf("Plik zamknięty poprawnie\n");
 		koniec = 0;
 		MPI_Bcast(&koniec, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	}
