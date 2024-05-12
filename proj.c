@@ -1,16 +1,18 @@
+#pragma warning(disable : 4996)
+
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-const int n = 3; //wielkosc mnozonych macierzy //rozmiar tablic
+#define SIZE 4
+const int n = 4; //wielkosc mnozonych macierzy //rozmiar tablic
 const int PP = 2; //pierwiastek z liczbu procesow //liczba procesorów = PP*PP 
 const int P = 4; //liczba procesow
 
-
-float a[n / PP][n / PP], b[n / PP][n / PP], c[n / PP][n / PP];
-float aa[n / PP][n / PP], bb[n / PP][n / PP];
-float(*psa)[n / PP], (*psb)[n / PP], (*pra)[n / PP], (*prb)[n / PP];
+float a[SIZE][SIZE], b[SIZE][SIZE], c[SIZE][SIZE];
+float aa[SIZE][SIZE], bb[SIZE][SIZE];
+float (*psa)[SIZE], (*psb)[SIZE], (*pra)[SIZE], (*prb)[SIZE];
 
 double startwtime1, startwtime2, endwtime;
 
@@ -34,14 +36,13 @@ int main(int argc, char** argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &ncpus);
 
 	if (my_rank == 0)
+	{
 		printf("obliczenia metod  Cannona dla tablicy %d x %d element w \n", n, n);
 
-	if (my_rank == 0) startwtime1 = MPI_Wtime();//czas w sekundach
+		startwtime1 = MPI_Wtime();//czas w sekundach
 
-	//wczytanie danych przez proces rank=0
-	if (my_rank == 0)
-	{
-		plik = fopen("liczby.txt", "r");
+		//wczytanie danych przez proces rank=0
+		plik = fopen("C:\\Users\\Marcin-PC\\Desktop\\OWS\\zad7_projekt\\liczby.txt", "r");
 		if (plik == NULL)
 		{
 			printf("Blad otwarcia pliku \"liczby.txt\"\n");
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
 	{
 		//odczyt danych wejściowych tablica A
 		//rozesłanie tablicy a zgodnie z dystrybucją początkową tablicy A
-        //odczyt danych wejściowych tablica B
+		//odczyt danych wejściowych tablica B
 		//rozesłanie tablicy a zgodnie z dystrybucją początkową tablicy B
 		//do uzupełnienia
 	}
